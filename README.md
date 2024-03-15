@@ -1,1 +1,1 @@
-# PlataformaCursosFGC
+# PlataformaCursosLGC
