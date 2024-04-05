@@ -26,7 +26,7 @@ export default function Dashboard() {
         <H2>Resumo</H2>
         <Table>
           <TableHead>
-            <TableRow style={{ backgroundColor: '#FF0043' }}>
+            <TableRow style={{ backgroundColor: '#0000FF' }}>
               <TableCell style={{ color: "#FFF" }}>Recurso</TableCell>
               <TableCell style={{ color: "#FFF" }}>Registros</TableCell>
             </TableRow>
