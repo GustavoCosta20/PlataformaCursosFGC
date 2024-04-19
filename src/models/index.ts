@@ -4,10 +4,9 @@ import { Episode } from './Episode'
 import { User } from './User'
 
 Category.hasMany(Course, { as: 'courses' })
-Course.hasMany(Episode, { as: 'episodes' })
 
 Course.belongsTo(Category)
-Course.hasMany(Episode)
+Course.hasMany(Episode, { as: 'episodes' })
 
 Episode.belongsTo(Course)
 
