@@ -1,0 +1,58 @@
+name: teste CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  install:
+    name: Installing Packages
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Cache node_modules
+        uses: actions/cache@v2
+        with:
+          path: node_modules
+          key: ${{runner.os}}-${{hashFiles('**/npm.lock')}}
+
+      - name: Install dependencies
+        run: npm install
+
+  # unusedexports:
+  #   name: Find unused exports (desd code)
+  #   runs-on: ubuntu-latest
+  #   needs: install
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+
+  #     - name: Restore node_modules
+  #       uses: actions/cache@v2
+  #       with:
+  #         path: node_modules
+  #         key: ${{runner.os}}-${{hashFiles('**/npm.lock')}}
+
+  #     - name: Run ts-prune
+  #       run: npx ts-prune --error
+
+  run-tests:
+    runs-on: ubuntu-latest
+    # needs: unusedexports
+    needs: install
+    strategy:
+      matrix:
+        node-version: [14.x, 16.x, 18.x]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: ls -la
