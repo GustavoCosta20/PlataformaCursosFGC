@@ -2,6 +2,8 @@ import { database } from "../database";
 import { DataTypes, Model, Optional } from "sequelize";
 import bcrypt from "bcrypt";
 
+type CheckPasswordCallback = (err?: Error, isSame?: boolean) => void;
+
 export interface User {
   id: number;
   firstName: string;
@@ -15,7 +17,9 @@ export interface User {
 
 export interface UserCreationAttributes extends Optional<User, "id"> {}
 
-export interface UserInstance extends Model<User, UserCreationAttributes>, User {}
+export interface UserInstance extends Model<User, UserCreationAttributes>, User {
+  checkPassword: (password: string, callbackfn: CheckPasswordCallback) => void;
+}
 
 export const User = database.define<UserInstance, User>(
   "User",
@@ -71,10 +75,25 @@ export const User = database.define<UserInstance, User>(
         //isNewRecord = prop. do sequelize retorna verdadeiro se a instância não estiver salva no banco de dados
         //changed = verfica se a prop. mudou de valor
         if (user.isNewRecord || user.changed("password")) {
-          //hash = cria uma hash pra senha (criptografar a senha no banco de dados )
           user.password = await bcrypt.hash(user.password.toString(), 10);
         }
       },
     },
   }
 );
+
+declare module "sequelize" {
+  interface Model {
+    checkPassword(password: string, callbackfn: CheckPasswordCallback): void;
+  }
+}
+
+User.prototype.checkPassword = async function (password: string, callbackfn: CheckPasswordCallback) {
+  try {
+    const user = this as UserInstance; // Informando ao TypeScript que 'this' é do tipo UserInstance
+    const isSame = await bcrypt.compare(password, user.password);
+    callbackfn(undefined, isSame);
+  } catch (err) {
+    callbackfn(err as Error); // Convertendo 'err' para 'Error'
+  }
+};
